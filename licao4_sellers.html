@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lição 4 — App Desktop do Claude: Chat, Cowork e Code</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+  :root {
+    --navy:   #001960;
+    --blue:   #1776FF;
+    --yellow: #FFB833;
+    --red:    #FB3D61;
+    --white:  #ffffff;
+    --bg:     #F4F6FB;
+    --surface:#ffffff;
+    --border: #DDE2EF;
+    --text:   #0D1B3E;
+    --muted:  #6B7A99;
+    --radius: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.65;
+    min-height: 100vh;
+  }
+
+  #progress-bar {
+    position: fixed;
+    top: 0; left: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--blue), var(--red));
+    transition: width 0.4s ease;
+    z-index: 100;
+  }
+
+  header {
+    background: var(--navy);
+    padding: 56px 24px 48px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 260px; height: 260px;
+    border-radius: 50%;
+    background: rgba(23,118,255,0.18);
+    pointer-events: none;
+  }
+  header::after {
+    content: '';
+    position: absolute;
+    bottom: -80px; left: -40px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: rgba(255,184,51,0.10);
+    pointer-events: none;
+  }
+
+  .lesson-tag {
+    display: inline-block;
+    background: rgba(255,184,51,0.15);
+    border: 1px solid rgba(255,184,51,0.4);
+    color: var(--yellow);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    padding: 5px 16px;
+    border-radius: 100px;
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 1;
+  }
+
+  h1 {
+    font-size: clamp(1.7rem, 4vw, 2.6rem);
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -0.5px;
+    color: var(--white);
+    margin-bottom: 12px;
+    position: relative;
+    z-index: 1;
+  }
+  h1 span { color: var(--yellow); }
+
+  .subtitle {
+    color: rgba(255,255,255,0.55);
+    font-size: 0.95rem;
+    max-width: 500px;
+    margin: 0 auto 32px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .progress-steps {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    position: relative;
+    z-index: 1;
+  }
+  .step-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    transition: all 0.3s;
+  }
+  .step-dot.active { background: var(--yellow); transform: scale(1.3); width: 22px; border-radius: 4px; }
+  .step-dot.done   { background: rgba(255,184,51,0.45); }
+
+  .progress-label { color: rgba(255,255,255,0.4); font-size: 12px; position: relative; z-index: 1; }
+  .progress-label span { color: var(--yellow); font-weight: 700; }
+
+  main {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 36px 20px 80px;
+  }
+
+  .section { display: none; animation: fadeUp 0.4s ease forwards; }
+  .section.active { display: block; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .section-title {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--navy);
+    margin-bottom: 6px;
+    letter-spacing: -0.3px;
+  }
+  .section-intro {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-bottom: 24px;
+    max-width: 580px;
+  }
+
+  /* MODE CARDS */
+  .mode-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  @media(max-width:620px){ .mode-grid { grid-template-columns: 1fr; } }
+
+  .mode-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px 18px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .mode-card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 4px;
+  }
+  .mode-card:hover { box-shadow: 0 4px 16px rgba(0,25,96,0.1); transform: translateY(-2px); }
+  .mode-card.selected { transform: translateY(-2px); }
+
+  .mc-chat::after    { background: var(--blue); }
+  .mc-cowork::after  { background: var(--yellow); }
+  .mc-code::after    { background: var(--red); }
+
+  .mc-chat.selected   { border-color: var(--blue); background: #EEF4FF; }
+  .mc-cowork.selected { border-color: #C88600; background: #FFFBEE; }
+  .mc-code.selected   { border-color: var(--red); background: #FFF5F7; }
+
+  .mode-icon { font-size: 2rem; margin-bottom: 10px; display: block; }
+  .mode-name {
+    font-weight: 800;
+    font-size: 1rem;
+    color: var(--navy);
+    margin-bottom: 6px;
+  }
+  .mode-tagline { font-size: 0.8rem; color: var(--muted); line-height: 1.4; }
+
+  .mode-detail {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 16px;
+    display: none;
+    animation: fadeUp 0.3s ease forwards;
+  }
+  .mode-detail.active { display: block; }
+
+  .detail-title {
+    font-weight: 800;
+    font-size: 1rem;
+    color: var(--navy);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .detail-badge {
+    display: inline-block;
+    padding: 3px 12px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  .badge-blue   { background: #EEF4FF; color: var(--blue); border: 1px solid rgba(23,118,255,0.3); }
+  .badge-yellow { background: #FFFBEE; color: #C88600;     border: 1px solid rgba(255,184,51,0.4); }
+  .badge-red    { background: #FFF5F7; color: var(--red);  border: 1px solid rgba(251,61,97,0.3); }
+
+  .feature-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+  .feature-item {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    font-size: 0.88rem;
+  }
+  .fi-icon {
+    width: 28px; height: 28px;
+    border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+  }
+  .fi-blue   { background: #EEF4FF; }
+  .fi-yellow { background: #FFFBEE; }
+  .fi-red    { background: #FFF5F7; }
+
+  .fi-text strong { font-weight: 700; color: var(--navy); display: block; font-size: 0.88rem; }
+  .fi-text span   { color: var(--muted); font-size: 0.83rem; }
+
+  .use-when {
+    background: #F8FAFF;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+  }
+  .uw-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  .uw-item {
+    display: flex;
+    gap: 8px;
+    font-size: 0.84rem;
+    color: var(--text);
+    padding: 4px 0;
+    border-bottom: 1px solid var(--border);
+    line-height: 1.45;
+  }
+  .uw-item:last-child { border-bottom: none; }
+  .uw-dot { color: var(--blue); font-weight: 800; flex-shrink: 0; }
+
+  /* COMPARISON TABLE */
+  .comp-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+    background: var(--surface);
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid var(--border);
+    margin-bottom: 16px;
+  }
+  .comp-table th {
+    background: var(--navy);
+    color: var(--white);
+    padding: 13px 14px;
+    text-align: left;
+    font-weight: 700;
+    font-size: 0.82rem;
+  }
+  .comp-table th:first-child { width: 30%; }
+  .comp-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    color: var(--text);
+    line-height: 1.45;
+  }
+  .comp-table tr:last-child td { border-bottom: none; }
+  .comp-table tr:nth-child(even) td { background: #F8FAFF; }
+  .comp-table .row-label {
+    font-weight: 700;
+    color: var(--navy);
+    font-size: 0.82rem;
+  }
+  .chip {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 600;
+    margin: 2px 2px 2px 0;
+  }
+  .chip-blue   { background: #EEF4FF; color: var(--blue); }
+  .chip-yellow { background: #FFFBEE; color: #C88600; }
+  .chip-red    { background: #FFF5F7; color: var(--red); }
+
+  /* DRAG & MATCH */
+  .match-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+  .match-instructions {
+    font-size: 0.88rem;
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
+  .match-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  @media(max-width:520px){ .match-layout { grid-template-columns: 1fr; } }
+
+  .match-col-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  .scenario-list { display: flex; flex-direction: column; gap: 8px; }
+  .scenario-item {
+    background: #F8FAFF;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 11px 13px;
+    font-size: 0.84rem;
+    line-height: 1.4;
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+  }
+  .scenario-item:hover { border-color: var(--blue); background: #EEF4FF; }
+  .scenario-item.picked { border-color: var(--blue); background: #EEF4FF; opacity: 0.5; pointer-events: none; }
+  .scenario-item.correct-src { border-color: #1DBF6E; background: #F0FBF5; opacity: 1; pointer-events: none; }
+  .scenario-item.wrong-src   { border-color: var(--red); background: #FFF5F7; opacity: 1; }
+
+  .drop-list { display: flex; flex-direction: column; gap: 8px; }
+  .drop-zone {
+    border: 1.5px dashed var(--border);
+    border-radius: 8px;
+    padding: 11px 13px;
+    font-size: 0.84rem;
+    min-height: 48px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .drop-zone:hover { border-color: var(--blue); background: #F8FAFF; }
+  .drop-zone.filled { border-style: solid; }
+  .drop-zone.correct { border-color: #1DBF6E; background: #F0FBF5; }
+  .drop-zone.wrong   { border-color: var(--red); background: #FFF5F7; }
+
+  .dz-mode {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+  .dz-chat   { background: #EEF4FF; color: var(--blue); }
+  .dz-cowork { background: #FFFBEE; color: #C88600; }
+  .dz-code   { background: #FFF5F7; color: var(--red); }
+
+  .dz-text { color: var(--muted); font-style: italic; font-size: 0.82rem; }
+  .dz-text.filled-text { color: var(--text); font-style: normal; }
+
+  .match-feedback {
+    margin-top: 16px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: none;
+  }
+  .match-feedback.show { display: block; }
+  .match-feedback.ok  { background: #F0FBF5; color: #0A6E3C; border: 1px solid #A8DFC0; }
+  .match-feedback.nok { background: #FFF5F7; color: #9B1A35; border: 1px solid #FBBCCA; }
+
+  /* QUIZ */
+  .quiz-q {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .q-text { font-weight: 700; font-size: 0.95rem; color: var(--navy); margin-bottom: 4px; line-height: 1.4; }
+  .q-context { color: var(--muted); font-size: 0.82rem; margin-bottom: 16px; }
+  .options { display: flex; flex-direction: column; gap: 8px; }
+  .option {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 12px 14px; border-radius: 8px;
+    border: 1.5px solid var(--border);
+    cursor: pointer; transition: all 0.15s;
+    font-size: 0.88rem; background: #F8FAFF; line-height: 1.45;
+  }
+  .option:hover { border-color: var(--blue); background: #EEF4FF; }
+  .option.selected { border-color: var(--blue); background: #EEF4FF; }
+  .option.correct  { border-color: #1DBF6E; background: #F0FBF5; }
+  .option.wrong    { border-color: var(--red); background: #FFF5F7; }
+  .opt-dot {
+    width: 17px; height: 17px;
+    border: 2px solid var(--border);
+    border-radius: 50%; flex-shrink: 0;
+    margin-top: 1px; transition: all 0.15s;
+  }
+  .option.selected .opt-dot { border-color: var(--blue); background: var(--blue); }
+  .option.correct .opt-dot  { border-color: #1DBF6E; background: #1DBF6E; }
+  .option.wrong .opt-dot    { border-color: var(--red); background: var(--red); }
+
+  .feedback {
+    display: none; margin-top: 12px; padding: 11px 14px;
+    border-radius: 8px; font-size: 0.85rem; font-weight: 500;
+  }
+  .feedback.show { display: block; }
+  .feedback.ok  { background: #F0FBF5; color: #0A6E3C; border: 1px solid #A8DFC0; }
+  .feedback.nok { background: #FFF5F7; color: #9B1A35; border: 1px solid #FBBCCA; }
+
+  .btn-check {
+    margin-top: 14px; padding: 9px 20px; border-radius: 8px;
+    border: 1.5px solid var(--blue); background: transparent;
+    color: var(--blue); font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-check:hover { background: var(--blue); color: var(--white); }
+  .btn-check:disabled { opacity: 0.3; cursor: not-allowed; background: transparent; color: var(--blue); }
+
+  .score-box {
+    background: var(--navy); border-radius: var(--radius);
+    padding: 28px; text-align: center; margin-bottom: 20px;
+  }
+  .score-num { font-size: 3.5rem; font-weight: 800; color: var(--yellow); line-height: 1; }
+  .score-msg { color: var(--white); font-size: 0.95rem; font-weight: 600; margin-top: 4px; }
+  .score-sub { color: rgba(255,255,255,0.5); font-size: 0.85rem; margin-top: 4px; }
+
+  /* REFLECTION */
+  .refl-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 22px; margin-bottom: 14px;
+  }
+  .refl-q { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 12px; }
+  .rq-num {
+    width: 26px; height: 26px; border-radius: 6px;
+    background: var(--navy); color: var(--white);
+    font-size: 12px; font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 1px;
+  }
+  .refl-q-text { font-weight: 600; font-size: 0.9rem; color: var(--navy); line-height: 1.45; }
+
+  textarea {
+    width: 100%; background: #F8FAFF;
+    border: 1.5px solid var(--border); border-radius: 8px;
+    color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 0.88rem; line-height: 1.6; padding: 12px 14px;
+    resize: vertical; min-height: 85px; outline: none; transition: border-color 0.2s;
+  }
+  textarea:focus { border-color: var(--blue); background: var(--white); }
+  textarea::placeholder { color: #AAB3CC; }
+  .char-count { text-align: right; font-size: 11px; color: var(--muted); margin-top: 5px; }
+
+  /* COMPLETION */
+  .completion {
+    background: var(--navy); border-radius: var(--radius);
+    padding: 36px 28px; text-align: center; margin-top: 24px;
+  }
+  .comp-icon { font-size: 2.8rem; display: block; margin-bottom: 14px; }
+  .comp-title { font-size: 1.4rem; font-weight: 800; color: var(--yellow); margin-bottom: 8px; }
+  .comp-text  { color: rgba(255,255,255,0.6); font-size: 0.88rem; max-width: 420px; margin: 0 auto 20px; }
+  .checklist  { max-width: 380px; margin: 0 auto 20px; text-align: left; }
+  .check-item {
+    display: flex; gap: 10px; align-items: flex-start;
+    font-size: 0.87rem; color: rgba(255,255,255,0.8);
+    padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.07);
+  }
+  .check-item:last-child { border-bottom: none; }
+  .ci { color: var(--yellow); flex-shrink: 0; font-weight: 700; }
+  .slack-tag {
+    display: inline-block;
+    background: rgba(255,184,51,0.15); border: 1px solid rgba(255,184,51,0.4);
+    color: var(--yellow); font-size: 0.85rem; font-weight: 700;
+    padding: 6px 16px; border-radius: 100px; margin-top: 8px;
+  }
+
+  /* NAV */
+  .nav-wrap {
+    display: flex; justify-content: space-between;
+    align-items: center; margin-top: 28px; gap: 10px;
+  }
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 12px 26px; border-radius: 8px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 13px; font-weight: 700; cursor: pointer;
+    border: none; transition: all 0.2s;
+  }
+  .btn-primary { background: var(--blue); color: var(--white); }
+  .btn-primary:hover { background: #0A5FD6; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(23,118,255,0.3); }
+  .btn-secondary { background: var(--white); color: var(--muted); border: 1.5px solid var(--border); }
+  .btn-secondary:hover { color: var(--navy); border-color: var(--navy); }
+  .btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  .tip-box {
+    background: #FFFBEE; border: 1px solid #FFE08A;
+    border-radius: var(--radius); padding: 14px 16px;
+    font-size: 0.87rem; color: #6B4A00;
+    display: flex; gap: 10px; align-items: flex-start; margin-bottom: 16px;
+  }
+
+  @media(max-width:480px){
+    .nav-wrap { flex-direction: column-reverse; }
+    .btn { width: 100%; justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<div id="progress-bar" style="width:0%"></div>
+
+<header>
+  <div class="lesson-tag">Módulo 1 · Lição 4</div>
+  <h1>App Desktop do Claude:<br><span>Chat, Cowork e Code</span></h1>
+  <p class="subtitle">Três modos para três tipos de trabalho — saiba qual usar em cada situação</p>
+  <div class="progress-steps" id="stepDots"></div>
+  <p class="progress-label">Seção <span id="curStep">1</span> de <span id="totSteps">5</span></p>
+</header>
+
+<main>
+
+  <!-- S1: VISÃO GERAL DOS MODOS -->
+  <div class="section active" id="s0">
+    <p class="section-title">Os três modos do app desktop</p>
+    <p class="section-intro">O app desktop do Claude oferece três formas de trabalhar. Cada modo foi projetado para um tipo de tarefa. Clique em cada um para conhecer os detalhes.</p>
+
+    <div class="mode-grid">
+      <div class="mode-card mc-chat" onclick="selectMode('chat')">
+        <span class="mode-icon">💬</span>
+        <div class="mode-name">Chat</div>
+        <div class="mode-tagline">Perguntas rápidas, rascunhos iterativos e aprendizado por diálogo</div>
+      </div>
+      <div class="mode-card mc-cowork" onclick="selectMode('cowork')">
+        <span class="mode-icon">🗂️</span>
+        <div class="mode-name">Cowork</div>
+        <div class="mode-tagline">Pesquisa aprofundada, análise de múltiplas fontes e entregas complexas</div>
+      </div>
+      <div class="mode-card mc-code" onclick="selectMode('code')">
+        <span class="mode-icon">⌨️</span>
+        <div class="mode-name">Code</div>
+        <div class="mode-tagline">Desenvolvimento de software: escrever, testar e implantar código</div>
+      </div>
+    </div>
+
+    <!-- CHAT DETAIL -->
+    <div class="mode-detail" id="detail-chat">
+      <div class="detail-title">
+        💬 Chat
+        <span class="detail-badge badge-blue">Trocas rápidas</span>
+      </div>
+      <div class="feature-list">
+        <div class="feature-item">
+          <div class="fi-icon fi-blue">⚡</div>
+          <div class="fi-text">
+            <strong>Acesso rápido</strong>
+            <span>Toque duas vezes em Option (Mac) para abrir o Claude sobre qualquer janela. Sem sair do que você estava fazendo.</span>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="fi-icon fi-blue">📸</div>
+          <div class="fi-text">
+            <strong>Capturas de tela</strong>
+            <span>Capture a tela ou compartilhe uma janela para o Claude ver exatamente o que você está olhando.</span>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="fi-icon fi-blue">🎙️</div>
+          <div class="fi-text">
+            <strong>Ditado por voz</strong>
+            <span>Fale sobre um problema em vez de digitar. Útil quando pensar em voz alta é mais rápido que escrever.</span>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="fi-icon fi-blue">🔌</div>
+          <div class="fi-text">
+            <strong>Conectores desktop</strong>
+            <span>Conecte ferramentas e serviços locais para que o Claude trabalhe com outros apps na sua máquina.</span>
+          </div>
+        </div>
+      </div>
+      <div class="use-when">
+        <div class="uw-title">Use o Chat quando...</div>
+        <div class="uw-item"><span class="uw-dot">→</span>Você está olhando para um painel e quer entender as métricas sem sair da janela</div>
+        <div class="uw-item"><span class="uw-dot">→</span>Está entre reuniões e quer estruturar uma apresentação por voz</div>
+        <div class="uw-item"><span class="uw-dot">→</span>Precisa de uma resposta rápida sem abrir uma nova aba</div>
+      </div>
+    </div>
+
+    <!-- COWORK DETAIL -->
+    <div class="mode-detail" id="detail-cowork">
+      <div class="detail-title">
+        🗂️ Cowork
+        <span class="detail-badge badge-yellow">Trabalho complexo</span>
+      </div>
+      <div class="feature-list">
+        <div class="feature-item">
+          <div class="fi-icon fi-yellow">📁</div>
+          <div class="fi-text">
+            <strong>Acesso a pastas</strong>
+            <span>Dê ao Claude acesso a uma pasta no seu computador. Ele lê, identifica o que é relevante e salva o resultado no mesmo lugar.</span>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="fi-icon fi-yellow">🕐</div>
+          <div class="fi-text">
+            <strong>Tarefas agendadas</strong>
+            <span>Configure rotinas automáticas: briefing diário, resumo semanal, triagem matinal. O Claude executa enquanto o app estiver aberto.</span>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="fi-icon fi-yellow">🌐</div>
+          <div class="fi-text">
+            <strong>Uso do navegador</strong>
+            <span>Com Claude no Chrome, ele navega em sites, interage com páginas e traz dados diretamente para a tarefa — sem você abrir uma aba.</span>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="fi-icon fi-yellow">🧩</div>
+          <div class="fi-text">
+            <strong>Plugins</strong>
+            <span>Adicione capacidades extras: dados financeiros em tempo real, base de conhecimento interna, frameworks específicos de conformidade.</span>
+          </div>
+        </div>
+      </div>
+      <div class="use-when">
+        <div class="uw-title">Use o Cowork quando...</div>
+        <div class="uw-item"><span class="uw-dot">→</span>Precisa cruzar informações de e-mails, Slack, reuniões e documentos de uma vez</div>
+        <div class="uw-item"><span class="uw-dot">→</span>Está mapeando concorrentes ou avaliando ferramentas com múltiplas fontes</div>
+        <div class="uw-item"><span class="uw-dot">→</span>Faz o mesmo trabalho toda manhã e quer automatizar com tarefa agendada</div>
+      </div>
+    </div>
+
+    <!-- CODE DETAIL -->
+    <div class="mode-detail" id="detail-code">
+      <div class="detail-title">
+        ⌨️ Code
+        <span class="detail-badge badge-red">Desenvolvimento</span>
+      </div>
+      <div class="feature-list">
+        <div class="feature-item">
+          <div class="fi-icon fi-red">👁️</div>
+          <div class="fi-text">
+            <strong>Diffs visuais</strong>
+            <span>Veja exatamente o que o Claude alterou no código antes de aceitar qualquer mudança.</span>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="fi-icon fi-red">🖥️</div>
+          <div class="fi-text">
+            <strong>Terminal integrado</strong>
+            <span>Comandos executados em tempo real, visíveis no painel — você acompanha cada passo.</span>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="fi-icon fi-red">🔀</div>
+          <div class="fi-text">
+            <strong>Três modos de controle</strong>
+            <span><strong>Ask:</strong> Claude propõe, você aprova. <strong>Code:</strong> aplica automaticamente, pede confirmação no terminal. <strong>Plan:</strong> descreve toda a abordagem antes de tocar no código.</span>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="fi-icon fi-red">☁️</div>
+          <div class="fi-text">
+            <strong>Local ou remoto</strong>
+            <span>Trabalhe direto na sua máquina ou conecte um repositório GitHub. No remoto, a sessão continua mesmo com o app fechado.</span>
+          </div>
+        </div>
+      </div>
+      <div class="use-when">
+        <div class="uw-title">Use o Code quando...</div>
+        <div class="uw-item"><span class="uw-dot">→</span>Quer construir funcionalidades descrevendo em linguagem natural</div>
+        <div class="uw-item"><span class="uw-dot">→</span>Precisa depurar erros colando a mensagem de erro e deixando o Claude investigar</div>
+        <div class="uw-item"><span class="uw-dot">→</span>Está navegando em uma base de código desconhecida</div>
+      </div>
+    </div>
+
+    <div class="tip-box">
+      <span>💡</span>
+      <span><strong>Cowork e Code usam o mesmo motor.</strong> Ambos rodam o Claude Code por baixo — localmente na sua máquina, capazes de trabalhar de forma independente e sustentar tarefas longas.</span>
+    </div>
+
+    <div class="nav-wrap">
+      <div></div>
+      <button class="btn btn-primary" onclick="goTo(1)">Próximo →</button>
+    </div>
+  </div>
+
+  <!-- S2: TABELA COMPARATIVA -->
+  <div class="section" id="s1">
+    <p class="section-title">Comparativo dos três modos</p>
+    <p class="section-intro">Uma visão lado a lado para você identificar rapidamente qual modo serve para cada situação.</p>
+
+    <table class="comp-table">
+      <thead>
+        <tr>
+          <th>Critério</th>
+          <th>💬 Chat</th>
+          <th>🗂️ Cowork</th>
+          <th>⌨️ Code</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="row-label">Otimizado para</td>
+          <td>Trocas rápidas, rascunhos iterativos, aprendizado por diálogo</td>
+          <td>Trabalho complexo: pesquisa, análise, produção de documentos finalizados</td>
+          <td>Desenvolvimento de software: escrever, testar, executar e implantar código</td>
+        </tr>
+        <tr>
+          <td class="row-label">Funcionalidades exclusivas</td>
+          <td><span class="chip chip-blue">Acesso rápido</span><span class="chip chip-blue">Voz</span><span class="chip chip-blue">Screenshot</span></td>
+          <td><span class="chip chip-yellow">Pastas locais</span><span class="chip chip-yellow">Agendamento</span><span class="chip chip-yellow">Plugins</span></td>
+          <td><span class="chip chip-red">Diffs visuais</span><span class="chip chip-red">Git</span><span class="chip chip-red">Ask/Code/Plan</span></td>
+        </tr>
+        <tr>
+          <td class="row-label">Acesso ao sistema</td>
+          <td>Ferramentas conectadas via MCP</td>
+          <td>Pastas compartilhadas (ambiente protegido)</td>
+          <td>Acesso total ao projeto: arquivos, terminal e ferramentas de dev</td>
+        </tr>
+        <tr>
+          <td class="row-label">Disponibilidade</td>
+          <td>Todos os planos</td>
+          <td>Pro, Max, Team e Enterprise (preview)</td>
+          <td>Pro, Max, Team e Enterprise (rollout gradual)</td>
+        </tr>
+        <tr>
+          <td class="row-label">Exemplo prático</td>
+          <td>"Reescreva este e-mail em tom mais direto"</td>
+          <td>"Pesquise concorrentes e entregue um briefing com fontes"</td>
+          <td>"Encontre o bug neste trecho e corrija com um teste"</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="tip-box">
+      <span>💡</span>
+      <span>O <strong>Chat</strong> é igual ao claude.ai — com vantagens extras por rodar nativamente no computador. O <strong>Cowork</strong> e o <strong>Code</strong> são para tarefas que precisam de autonomia e mais alcance.</span>
+    </div>
+
+    <div class="nav-wrap">
+      <button class="btn btn-secondary" onclick="goTo(0)">← Anterior</button>
+      <button class="btn btn-primary" onclick="goTo(2)">Próximo →</button>
+    </div>
+  </div>
+
+  <!-- S3: ASSOCIAÇÃO DE CENÁRIOS -->
+  <div class="section" id="s2">
+    <p class="section-title">Qual modo usar?</p>
+    <p class="section-intro">Leia cada cenário e clique no modo correto para associá-lo. Depois clique em Verificar.</p>
+
+    <div class="match-wrap">
+      <div class="match-layout">
+        <div>
+          <div class="match-col-title">Cenários</div>
+          <div class="scenario-list" id="scenarios">
+            <div class="scenario-item" data-id="0" onclick="pickScenario(this)">
+              Você está em uma reunião online e precisa entender rapidamente uma sigla que apareceu na apresentação
+            </div>
+            <div class="scenario-item" data-id="1" onclick="pickScenario(this)">
+              Você quer um briefing semanal automático reunindo atualizações do Slack, e-mail e calendário
+            </div>
+            <div class="scenario-item" data-id="2" onclick="pickScenario(this)">
+              Você precisa depurar um erro em produção e testar a correção direto no repositório do GitHub
+            </div>
+            <div class="scenario-item" data-id="3" onclick="pickScenario(this)">
+              Você quer analisar 30 contratos e identificar cláusulas de risco em todos eles
+            </div>
+            <div class="scenario-item" data-id="4" onclick="pickScenario(this)">
+              Você quer rascunhar uma resposta para um e-mail difícil enquanto ele ainda está aberto
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="match-col-title">Modo correto</div>
+          <div class="drop-list" id="dropzones">
+            <div class="drop-zone" data-mode="chat" onclick="dropHere(this)">
+              <span class="dz-mode dz-chat">Chat</span>
+              <span class="dz-text" id="dz-chat-text">Clique aqui após escolher um cenário</span>
+            </div>
+            <div class="drop-zone" data-mode="chat" onclick="dropHere(this)">
+              <span class="dz-mode dz-chat">Chat</span>
+              <span class="dz-text" id="dz-chat2-text">Clique aqui após escolher um cenário</span>
+            </div>
+            <div class="drop-zone" data-mode="cowork" onclick="dropHere(this)">
+              <span class="dz-mode dz-cowork">Cowork</span>
+              <span class="dz-text" id="dz-cowork-text">Clique aqui após escolher um cenário</span>
+            </div>
+            <div class="drop-zone" data-mode="cowork" onclick="dropHere(this)">
+              <span class="dz-mode dz-cowork">Cowork</span>
+              <span class="dz-text" id="dz-cowork2-text">Clique aqui após escolher um cenário</span>
+            </div>
+            <div class="drop-zone" data-mode="code" onclick="dropHere(this)">
+              <span class="dz-mode dz-code">Code</span>
+              <span class="dz-text" id="dz-code-text">Clique aqui após escolher um cenário</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="btn-check" id="btn-match" onclick="checkMatch()" disabled>Verificar associações</button>
+        <button class="btn-check" id="btn-reset-match" onclick="resetMatch()" style="border-color:var(--muted);color:var(--muted);">Recomeçar</button>
+      </div>
+      <div class="match-feedback" id="match-fb"></div>
+    </div>
+
+    <div class="nav-wrap">
+      <button class="btn btn-secondary" onclick="goTo(1)">← Anterior</button>
+      <button class="btn btn-primary" id="match-next" onclick="goTo(3)">Próximo →</button>
+    </div>
+  </div>
+
+  <!-- S4: QUIZ -->
+  <div class="section" id="s3">
+    <p class="section-title">Quiz rápido</p>
+    <p class="section-intro">Três perguntas para consolidar o que você aprendeu sobre o app desktop.</p>
+
+    <div class="quiz-q" id="q1">
+      <div class="q-text">Qual funcionalidade do modo Chat permite abrir o Claude sem sair do que você está fazendo?</div>
+      <div class="options">
+        <div class="option" onclick="sel(this,'q1',false)"><div class="opt-dot"></div>Tarefas agendadas</div>
+        <div class="option" onclick="sel(this,'q1',true)"><div class="opt-dot"></div>Acesso rápido (duplo toque em Option)</div>
+        <div class="option" onclick="sel(this,'q1',false)"><div class="opt-dot"></div>Plugins</div>
+        <div class="option" onclick="sel(this,'q1',false)"><div class="opt-dot"></div>Modo Plan</div>
+      </div>
+      <button class="btn-check" id="bc-q1" onclick="check('q1')" disabled>Verificar</button>
+      <div class="feedback" id="fb-q1"></div>
+    </div>
+
+    <div class="quiz-q" id="q2">
+      <div class="q-text">No modo Code, qual opção faz o Claude descrever toda a abordagem antes de tocar em qualquer arquivo?</div>
+      <div class="options">
+        <div class="option" onclick="sel(this,'q2',false)"><div class="opt-dot"></div>Ask</div>
+        <div class="option" onclick="sel(this,'q2',false)"><div class="opt-dot"></div>Code</div>
+        <div class="option" onclick="sel(this,'q2',true)"><div class="opt-dot"></div>Plan</div>
+        <div class="option" onclick="sel(this,'q2',false)"><div class="opt-dot"></div>Review</div>
+      </div>
+      <button class="btn-check" id="bc-q2" onclick="check('q2')" disabled>Verificar</button>
+      <div class="feedback" id="fb-q2"></div>
+    </div>
+
+    <div class="quiz-q" id="q3">
+      <div class="q-text">Você precisa fazer o mesmo relatório toda segunda-feira, reunindo dados do Slack e do calendário. Qual modo e funcionalidade usar?</div>
+      <div class="options">
+        <div class="option" onclick="sel(this,'q3',false)"><div class="opt-dot"></div>Chat — acesso rápido</div>
+        <div class="option" onclick="sel(this,'q3',false)"><div class="opt-dot"></div>Code — modo Plan</div>
+        <div class="option" onclick="sel(this,'q3',true)"><div class="opt-dot"></div>Cowork — tarefas agendadas</div>
+        <div class="option" onclick="sel(this,'q3',false)"><div class="opt-dot"></div>Chat — conectores desktop</div>
+      </div>
+      <button class="btn-check" id="bc-q3" onclick="check('q3')" disabled>Verificar</button>
+      <div class="feedback" id="fb-q3"></div>
+    </div>
+
+    <div id="score-block" style="display:none;">
+      <div class="score-box">
+        <div class="score-num" id="score-num">0/3</div>
+        <div class="score-msg" id="score-msg">—</div>
+        <div class="score-sub">respostas corretas</div>
+      </div>
+    </div>
+
+    <div class="nav-wrap">
+      <button class="btn btn-secondary" onclick="goTo(2)">← Anterior</button>
+      <button class="btn btn-primary" id="q-next" onclick="goTo(4)" disabled>Próximo →</button>
+    </div>
+  </div>
+
+  <!-- S5: REFLEXÃO -->
+  <div class="section" id="s4">
+    <p class="section-title">Reflexão pessoal</p>
+    <p class="section-intro">Aplique o que aprendeu à sua rotina. Escreva pelo menos uma reflexão para concluir.</p>
+
+    <div class="refl-card">
+      <div class="refl-q">
+        <div class="rq-num">1</div>
+        <div class="refl-q-text">Pense nas tarefas para as quais você mais usa o Claude hoje. Qual modo — Chat, Cowork ou Code — seria mais adequado para cada uma delas?</div>
+      </div>
+      <textarea id="r1" placeholder="Descreva suas tarefas e o modo que faz mais sentido para cada..." oninput="updChar('r1','c1')"></textarea>
+      <div class="char-count" id="c1">0 caracteres</div>
+    </div>
+
+    <div class="refl-card">
+      <div class="refl-q">
+        <div class="rq-num">2</div>
+        <div class="refl-q-text">Existe alguma tarefa repetitiva no seu trabalho que poderia virar uma tarefa agendada no Cowork? Qual seria?</div>
+      </div>
+      <textarea id="r2" placeholder="Descreva a tarefa, a frequência e o que você esperaria receber..." oninput="updChar('r2','c2')"></textarea>
+      <div class="char-count" id="c2">0 caracteres</div>
+    </div>
+
+    <div class="refl-card">
+      <div class="refl-q">
+        <div class="rq-num">3</div>
+        <div class="refl-q-text">Considerando um projeto recente em que você precisou reunir informações de múltiplas fontes, como o Cowork poderia ter mudado seu fluxo de trabalho?</div>
+      </div>
+      <textarea id="r3" placeholder="Descreva o projeto e como o Cowork ajudaria..." oninput="updChar('r3','c3')"></textarea>
+      <div class="char-count" id="c3">0 caracteres</div>
+    </div>
+
+    <div id="comp-block" style="display:none;">
+      <div class="completion">
+        <span class="comp-icon">🚀</span>
+        <div class="comp-title">Lição 4 concluída!</div>
+        <p class="comp-text">Agora você sabe navegar entre os três modos e escolher o certo para cada tipo de trabalho.</p>
+        <div class="checklist">
+          <div class="check-item"><span class="ci">✓</span> Chat: acesso rápido, voz, screenshot e conectores</div>
+          <div class="check-item"><span class="ci">✓</span> Cowork: pastas, agendamento, browser e plugins</div>
+          <div class="check-item"><span class="ci">✓</span> Code: diffs visuais, terminal, git e modos Ask/Code/Plan</div>
+          <div class="check-item"><span class="ci">✓</span> Comparativo dos três modos</div>
+          <div class="check-item"><span class="ci">✓</span> Reflexão aplicada à sua rotina</div>
+        </div>
+        <p style="color:rgba(255,255,255,0.5);font-size:0.85rem;">Compartilhe no canal</p>
+        <span class="slack-tag">#conhecimento-de-elite</span>
+      </div>
+    </div>
+
+    <div class="nav-wrap">
+      <button class="btn btn-secondary" onclick="goTo(3)">← Anterior</button>
+      <button class="btn btn-primary" id="finish-btn" onclick="finish()">Concluir lição ✓</button>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  const N = 5;
+  let cur = 0;
+
+  // Correct answers for matching: scenario id -> mode
+  const correctMap = { 0:'chat', 1:'cowork', 2:'code', 3:'cowork', 4:'chat' };
+  const scenarioTexts = {
+    0: 'Entender sigla na reunião',
+    1: 'Briefing semanal automático',
+    2: 'Depurar erro no repositório',
+    3: 'Analisar 30 contratos',
+    4: 'Rascunhar resposta de e-mail'
+  };
+
+  let pickedScenario = null;
+  let dropAssignments = {}; // dropzone index -> scenario id
+  let matchDone = false;
+
+  // Quiz state
+  const qState = { q1:null, q2:null, q3:null };
+  const qDone  = { q1:false, q2:false, q3:false };
+  const qFB = {
+    q1: { ok:'✓ Correto. O acesso rápido com duplo toque em Option é uma das vantagens exclusivas do app desktop.', nok:'✗ Tarefas agendadas e Plugins são do Cowork. O modo Plan é do Code. O acesso rápido é exclusivo do Chat no app desktop.' },
+    q2: { ok:'✓ Correto. O modo Plan mostra toda a estratégia antes de qualquer alteração — ideal para tarefas críticas.', nok:'✗ Ask propõe e aguarda aprovação por mudança. Code aplica automaticamente. Plan é o que descreve tudo antes de começar.' },
+    q3: { ok:'✓ Correto. Tarefas agendadas no Cowork foram feitas exatamente para isso: automatizar rotinas recorrentes.', nok:'✗ Para tarefas que se repetem com frequência e envolvem múltiplas fontes, o Cowork com agendamento é a escolha certa.' }
+  };
+
+  function init() {
+    document.getElementById('totSteps').textContent = N;
+    const wrap = document.getElementById('stepDots');
+    for (let i = 0; i < N; i++) {
+      const d = document.createElement('div');
+      d.className = 'step-dot' + (i === 0 ? ' active' : '');
+      wrap.appendChild(d);
+    }
+    updUI();
+  }
+
+  function updUI() {
+    document.getElementById('curStep').textContent = cur + 1;
+    document.getElementById('progress-bar').style.width = ((cur + 1) / N * 100) + '%';
+    document.querySelectorAll('.step-dot').forEach((d, i) => {
+      d.className = 'step-dot';
+      if (i < cur) d.classList.add('done');
+      else if (i === cur) d.classList.add('active');
+    });
+  }
+
+  function goTo(n) {
+    document.getElementById('s' + cur).classList.remove('active');
+    cur = n;
+    document.getElementById('s' + n).classList.add('active');
+    updUI();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // MODE SELECTION (S1)
+  function selectMode(mode) {
+    document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('selected'));
+    document.querySelectorAll('.mode-detail').forEach(d => d.classList.remove('active'));
+    document.querySelector('.mc-' + mode).classList.add('selected');
+    document.getElementById('detail-' + mode).classList.add('active');
+  }
+
+  // MATCHING (S3)
+  function pickScenario(el) {
+    if (matchDone) return;
+    document.querySelectorAll('.scenario-item').forEach(s => s.classList.remove('picked'));
+    el.classList.add('picked');
+    pickedScenario = { id: parseInt(el.dataset.id), text: el.textContent.trim() };
+  }
+
+  function dropHere(zone) {
+    if (!pickedScenario || matchDone) return;
+    const zoneIndex = Array.from(document.querySelectorAll('.drop-zone')).indexOf(zone);
+    // Check if zone already filled
+    if (zone.classList.contains('filled')) return;
+
+    dropAssignments[zoneIndex] = pickedScenario.id;
+    const textSpan = zone.querySelector('.dz-text');
+    textSpan.textContent = pickedScenario.text;
+    textSpan.classList.add('filled-text');
+    zone.classList.add('filled');
+
+    // Mark source as assigned
+    document.querySelector(`.scenario-item[data-id="${pickedScenario.id}"]`).classList.add('picked');
+    pickedScenario = null;
+
+    // Enable verify if all filled
+    const allFilled = document.querySelectorAll('.drop-zone.filled').length === 5;
+    document.getElementById('btn-match').disabled = !allFilled;
+  }
+
+  function checkMatch() {
+    if (matchDone) return;
+    matchDone = true;
+    document.getElementById('btn-match').disabled = true;
+
+    const zones = document.querySelectorAll('.drop-zone');
+    // Correct mapping: dropzone index -> expected mode
+    // Chat zones: 0,1 | Cowork: 2,3 | Code: 4
+    const zoneModes = ['chat','chat','cowork','cowork','code'];
+    let correct = 0;
+
+    zones.forEach((zone, i) => {
+      const assignedScenarioId = dropAssignments[i];
+      const expectedMode = zoneModes[i];
+      const actualMode = correctMap[assignedScenarioId];
+      const src = document.querySelector(`.scenario-item[data-id="${assignedScenarioId}"]`);
+
+      if (actualMode === expectedMode) {
+        zone.classList.add('correct');
+        if (src) src.classList.add('correct-src');
+        correct++;
+      } else {
+        zone.classList.add('wrong');
+        if (src) src.classList.add('wrong-src');
+      }
+    });
+
+    const fb = document.getElementById('match-fb');
+    fb.classList.add('show');
+    if (correct === 5) {
+      fb.className = 'match-feedback show ok';
+      fb.textContent = '✓ Perfeito! Você acertou todos os cenários.';
+    } else if (correct >= 3) {
+      fb.className = 'match-feedback show ok';
+      fb.textContent = `✓ Você acertou ${correct} de 5. Revise os modos e tente novamente se quiser.`;
+    } else {
+      fb.className = 'match-feedback show nok';
+      fb.textContent = `✗ Você acertou ${correct} de 5. Volte à seção anterior e revise as características de cada modo.`;
+    }
+  }
+
+  function resetMatch() {
+    matchDone = false;
+    pickedScenario = null;
+    dropAssignments = {};
+    document.querySelectorAll('.scenario-item').forEach(s => s.className = 'scenario-item');
+    document.querySelectorAll('.drop-zone').forEach(z => {
+      z.className = 'drop-zone';
+      const span = z.querySelector('.dz-text');
+      span.textContent = 'Clique aqui após escolher um cenário';
+      span.classList.remove('filled-text');
+    });
+    document.getElementById('btn-match').disabled = true;
+    document.getElementById('match-fb').className = 'match-feedback';
+  }
+
+  // QUIZ (S4)
+  function sel(el, qid, correct) {
+    if (qDone[qid]) return;
+    el.closest('.options').querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    qState[qid] = { el, correct };
+    document.getElementById('bc-' + qid).disabled = false;
+  }
+
+  function check(qid) {
+    if (qDone[qid] || !qState[qid]) return;
+    qDone[qid] = true;
+    const { el, correct } = qState[qid];
+    document.getElementById('bc-' + qid).disabled = true;
+    const fb = document.getElementById('fb-' + qid);
+    if (correct) {
+      el.classList.replace('selected','correct');
+      fb.className = 'feedback show ok';
+      fb.textContent = qFB[qid].ok;
+    } else {
+      el.classList.replace('selected','wrong');
+      el.closest('.options').querySelectorAll('.option').forEach(o => {
+        const hits = { q1:'Acesso rápido', q2:'Plan', q3:'Cowork — tarefas agendadas' };
+        if (o.textContent.trim().includes(hits[qid])) o.classList.add('correct');
+      });
+      fb.className = 'feedback show nok';
+      fb.textContent = qFB[qid].nok;
+    }
+    if (Object.values(qDone).every(v => v)) {
+      const score = Object.values(qState).filter(s => s.correct).length;
+      document.getElementById('score-block').style.display = 'block';
+      document.getElementById('score-num').textContent = score + '/3';
+      const msgs = ['Continue praticando!', 'Bom começo.', 'Muito bem!', 'Perfeito! 🎉'];
+      document.getElementById('score-msg').textContent = msgs[score];
+      document.getElementById('q-next').disabled = false;
+    }
+  }
+
+  // REFLECTION
+  function updChar(tid, cid) {
+    const l = document.getElementById(tid).value.length;
+    document.getElementById(cid).textContent = l + ' caractere' + (l !== 1 ? 's' : '');
+  }
+
+  function finish() {
+    const vals = ['r1','r2','r3'].map(id => document.getElementById(id).value.trim());
+    if (!vals.some(v => v.length > 0)) {
+      alert('Escreva pelo menos uma reflexão antes de concluir.');
+      return;
+    }
+    document.getElementById('comp-block').style.display = 'block';
+    document.getElementById('finish-btn').disabled = true;
+    document.getElementById('finish-btn').textContent = '✓ Concluído';
+    document.getElementById('progress-bar').style.width = '100%';
+    document.querySelectorAll('.step-dot').forEach(d => d.className = 'step-dot done');
+    setTimeout(() => document.getElementById('comp-block').scrollIntoView({ behavior: 'smooth' }), 200);
+  }
+
+  init();
+</script>
+</body>
+</html>
