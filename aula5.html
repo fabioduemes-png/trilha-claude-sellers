@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lição 5 — Organizando seu trabalho com Projetos</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,800;1,9..144,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #FDF6EE;
+  --bg-dark: #F5EDE2;
+  --ink: #1A1A1A;
+  --ink-light: #5A5348;
+  --accent: #D4572A;
+  --accent-glow: #E8734A;
+  --teal: #1A7A6D;
+  --teal-light: #E2F3F0;
+  --gold: #C9962B;
+  --gold-light: #FFF4DC;
+  --card: #FFFFFF;
+  --border: #E0D6CA;
+  --shadow: 0 2px 20px rgba(26,26,26,.06);
+  --shadow-lg: 0 8px 40px rgba(26,26,26,.1);
+  --radius: 14px;
+  --transition: .3s cubic-bezier(.4,0,.2,1);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.65;
+  overflow-x: hidden;
+}
+
+/* ─── HERO ─── */
+.hero {
+  position: relative;
+  min-height: 85vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 60px 24px;
+  overflow: hidden;
+  background: linear-gradient(170deg, #1A1A1A 0%, #2C2420 50%, var(--accent) 150%);
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 50% at 20% 80%, rgba(212,87,42,.15) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 40% at 80% 20%, rgba(26,122,109,.1) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.hero-content { position: relative; z-index: 1; max-width: 720px; }
+
+.hero-badge {
+  display: inline-block;
+  padding: 6px 18px;
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: 100px;
+  color: rgba(255,255,255,.7);
+  font-size: .8rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  margin-bottom: 32px;
+  animation: fadeUp .8s ease both;
+}
+
+.hero h1 {
+  font-family: 'Fraunces', serif;
+  font-weight: 800;
+  font-size: clamp(2.4rem, 6vw, 4.2rem);
+  color: #fff;
+  line-height: 1.1;
+  margin-bottom: 20px;
+  animation: fadeUp .8s .15s ease both;
+}
+
+.hero h1 em {
+  font-style: italic;
+  font-weight: 300;
+  color: var(--accent-glow);
+}
+
+.hero p {
+  color: rgba(255,255,255,.7);
+  font-size: 1.1rem;
+  max-width: 520px;
+  margin: 0 auto 36px;
+  animation: fadeUp .8s .3s ease both;
+}
+
+.hero-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 32px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 100px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  animation: fadeUp .8s .45s ease both;
+  text-decoration: none;
+}
+.hero-cta:hover { background: var(--accent-glow); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(212,87,42,.3); }
+.hero-cta svg { transition: transform .3s; }
+.hero-cta:hover svg { transform: translateX(4px); }
+
+/* ─── LAYOUT ─── */
+.container { max-width: 860px; margin: 0 auto; padding: 0 24px; }
+
+section { padding: 80px 0; }
+
+.section-label {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 100px;
+  font-size: .75rem;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.section-label--accent { background: rgba(212,87,42,.1); color: var(--accent); }
+.section-label--teal { background: var(--teal-light); color: var(--teal); }
+.section-label--gold { background: var(--gold-light); color: var(--gold); }
+
+.section-title {
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+  line-height: 1.2;
+  margin-bottom: 12px;
+}
+
+.section-desc {
+  color: var(--ink-light);
+  font-size: 1.05rem;
+  max-width: 600px;
+  margin-bottom: 40px;
+}
+
+/* ─── CARDS ─── */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 28px;
+  transition: var(--transition);
+}
+.card:hover { box-shadow: var(--shadow-lg); }
+
+/* ─── ACCORDION ─── */
+.accordion { display: flex; flex-direction: column; gap: 12px; }
+
+.accordion-item { overflow: hidden; }
+
+.accordion-btn {
+  width: 100%;
+  text-align: left;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: var(--transition);
+  color: var(--ink);
+}
+.accordion-btn:hover { border-color: var(--accent); }
+.accordion-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); border-radius: var(--radius) var(--radius) 0 0; }
+
+.accordion-btn .icon {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  background: rgba(212,87,42,.1);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  transition: var(--transition);
+}
+.accordion-btn.active .icon { background: rgba(255,255,255,.2); }
+
+.accordion-btn .chevron {
+  margin-left: auto;
+  transition: transform .3s;
+  font-size: .8rem;
+  opacity: .5;
+}
+.accordion-btn.active .chevron { transform: rotate(180deg); opacity: 1; }
+
+.accordion-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height .4s ease;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 var(--radius) var(--radius);
+}
+.accordion-body.open { max-height: 600px; }
+.accordion-body-inner { padding: 20px 24px; color: var(--ink-light); font-size: .95rem; line-height: 1.7; }
+
+/* ─── STEPS SIMULATOR ─── */
+.steps-wrap {
+  position: relative;
+}
+
+.step-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 24px;
+  background: var(--bg-dark);
+  border-radius: 12px;
+  padding: 4px;
+}
+
+.step-tab {
+  flex: 1;
+  padding: 12px 8px;
+  border: none;
+  background: transparent;
+  border-radius: 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .85rem;
+  font-weight: 500;
+  color: var(--ink-light);
+  cursor: pointer;
+  transition: var(--transition);
+  text-align: center;
+}
+.step-tab.active { background: var(--card); color: var(--ink); box-shadow: var(--shadow); font-weight: 600; }
+
+.step-panel {
+  display: none;
+  animation: fadeIn .4s ease;
+}
+.step-panel.active { display: block; }
+
+.step-panel h3 {
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  font-size: 1.3rem;
+  margin-bottom: 10px;
+}
+.step-panel p { color: var(--ink-light); margin-bottom: 16px; font-size: .95rem; }
+
+.mock-ui {
+  background: var(--bg-dark);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  position: relative;
+}
+
+.mock-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .95rem;
+  background: var(--card);
+  color: var(--ink);
+  outline: none;
+  transition: var(--transition);
+  margin-bottom: 12px;
+}
+.mock-input:focus { border-color: var(--accent); }
+
+.mock-textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .9rem;
+  background: var(--card);
+  color: var(--ink);
+  outline: none;
+  min-height: 100px;
+  resize: vertical;
+  transition: var(--transition);
+  line-height: 1.6;
+}
+.mock-textarea:focus { border-color: var(--accent); }
+
+.mock-label {
+  font-size: .8rem;
+  font-weight: 600;
+  color: var(--ink-light);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  margin-bottom: 6px;
+  display: block;
+}
+
+.mock-tag {
+  display: inline-block;
+  padding: 4px 12px;
+  background: rgba(26,122,109,.08);
+  color: var(--teal);
+  font-size: .8rem;
+  font-weight: 500;
+  border-radius: 100px;
+  margin: 4px 4px 4px 0;
+}
+
+.mock-btn {
+  padding: 10px 24px;
+  border: none;
+  border-radius: 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
+  font-size: .9rem;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.mock-btn--primary { background: var(--accent); color: #fff; }
+.mock-btn--primary:hover { background: var(--accent-glow); }
+.mock-btn--ghost { background: transparent; color: var(--ink-light); border: 1px solid var(--border); }
+
+/* ─── MATCHING GAME ─── */
+.match-game {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+@media(max-width:600px) { .match-game { grid-template-columns: 1fr; } }
+
+.match-col-title {
+  font-size: .8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--ink-light);
+  margin-bottom: 12px;
+}
+
+.match-item {
+  padding: 14px 18px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  background: var(--card);
+  font-size: .9rem;
+  cursor: pointer;
+  transition: var(--transition);
+  margin-bottom: 8px;
+  user-select: none;
+}
+.match-item:hover { border-color: var(--accent); }
+.match-item.selected { border-color: var(--accent); background: rgba(212,87,42,.06); }
+.match-item.correct { border-color: var(--teal); background: var(--teal-light); }
+.match-item.wrong { border-color: #D44; background: rgba(221,68,68,.06); animation: shake .4s; }
+
+.match-feedback {
+  grid-column: 1/-1;
+  text-align: center;
+  padding: 16px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: .95rem;
+  display: none;
+}
+.match-feedback.show { display: block; }
+.match-feedback.success { background: var(--teal-light); color: var(--teal); }
+.match-feedback.partial { background: var(--gold-light); color: var(--gold); }
+
+/* ─── QUIZ ─── */
+.quiz-question {
+  margin-bottom: 32px;
+  padding-bottom: 32px;
+  border-bottom: 1px solid var(--border);
+}
+.quiz-question:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+
+.quiz-q {
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin-bottom: 16px;
+  display: flex;
+  gap: 10px;
+}
+.quiz-q .q-num {
+  display: inline-flex;
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: rgba(212,87,42,.1);
+  color: var(--accent);
+  font-size: .85rem;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 700;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.quiz-options { display: flex; flex-direction: column; gap: 8px; }
+
+.quiz-opt {
+  padding: 12px 18px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  background: var(--card);
+  cursor: pointer;
+  transition: var(--transition);
+  font-size: .9rem;
+}
+.quiz-opt:hover { border-color: var(--accent); }
+.quiz-opt.selected { border-color: var(--accent); background: rgba(212,87,42,.06); }
+.quiz-opt.correct { border-color: var(--teal); background: var(--teal-light); pointer-events: none; }
+.quiz-opt.wrong { border-color: #D44; background: rgba(221,68,68,.06); pointer-events: none; }
+.quiz-opt.disabled { pointer-events: none; opacity: .5; }
+
+.quiz-explain {
+  margin-top: 10px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-size: .88rem;
+  line-height: 1.6;
+  display: none;
+}
+.quiz-explain.show { display: block; }
+.quiz-explain.right { background: var(--teal-light); color: var(--teal); }
+.quiz-explain.wrong-exp { background: rgba(221,68,68,.06); color: #B33; }
+
+.quiz-results {
+  text-align: center;
+  padding: 32px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-top: 24px;
+  display: none;
+}
+.quiz-results.show { display: block; }
+.quiz-results .score {
+  font-family: 'Fraunces', serif;
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--accent);
+}
+.quiz-results p { color: var(--ink-light); margin-top: 8px; }
+
+.quiz-submit {
+  display: block;
+  margin: 24px auto 0;
+  padding: 14px 40px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 100px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.quiz-submit:hover { background: var(--accent-glow); }
+
+/* ─── TIPS CAROUSEL ─── */
+.tips-carousel {
+  position: relative;
+  overflow: hidden;
+}
+
+.tips-track {
+  display: flex;
+  transition: transform .5s ease;
+}
+
+.tip-card {
+  min-width: 100%;
+  padding: 36px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.tip-card .tip-number {
+  font-family: 'Fraunces', serif;
+  font-weight: 800;
+  font-size: 3rem;
+  color: rgba(212,87,42,.15);
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.tip-card h3 {
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  font-size: 1.2rem;
+  margin-bottom: 8px;
+}
+
+.tip-card p { color: var(--ink-light); font-size: .95rem; }
+
+.tips-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.tips-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--border);
+  border: none;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.tips-dot.active { background: var(--accent); width: 28px; border-radius: 100px; }
+
+.tips-arrow {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--card);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: var(--transition);
+  font-size: 1.1rem;
+  color: var(--ink);
+}
+.tips-arrow:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ─── PROGRESS BAR ─── */
+.progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: var(--accent);
+  z-index: 1000;
+  transition: width .2s;
+}
+
+/* ─── FOOTER ─── */
+.footer {
+  text-align: center;
+  padding: 48px 24px;
+  border-top: 1px solid var(--border);
+  color: var(--ink-light);
+  font-size: .85rem;
+}
+.footer a { color: var(--accent); text-decoration: none; }
+
+/* ─── ANIMATIONS ─── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  20%,60% { transform: translateX(-6px); }
+  40%,80% { transform: translateX(6px); }
+}
+
+.fade-in { opacity: 0; transform: translateY(20px); transition: opacity .6s ease, transform .6s ease; }
+.fade-in.visible { opacity: 1; transform: translateY(0); }
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:600px) {
+  .step-tabs { flex-wrap: wrap; }
+  .step-tab { font-size: .78rem; }
+  .hero { min-height: 70vh; }
+}
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- ═══════ HERO ═══════ -->
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-badge">Lição 5 — Treinamento Claude</div>
+    <h1>Organizando seu trabalho com <em>Projetos</em></h1>
+    <p>Aprenda a criar espaços de trabalho dedicados com memória, instruções e base de conhecimento — tudo persistente entre conversas.</p>
+    <a href="#learn" class="hero-cta">
+      Começar a aprender
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </a>
+  </div>
+</section>
+
+<!-- ═══════ CONCEITOS ═══════ -->
+<section id="learn">
+  <div class="container">
+    <div class="fade-in">
+      <span class="section-label section-label--accent">Conceitos-chave</span>
+      <h2 class="section-title">O que são Projetos?</h2>
+      <p class="section-desc">Explore cada conceito clicando nos itens abaixo. Projetos são muito mais do que pastas — são ambientes inteligentes.</p>
+    </div>
+
+    <div class="accordion fade-in">
+      <div class="accordion-item">
+        <button class="accordion-btn" onclick="toggleAccordion(this)">
+          <span class="icon">🗂️</span>
+          Espaço de trabalho independente
+          <span class="chevron">▼</span>
+        </button>
+        <div class="accordion-body">
+          <div class="accordion-body-inner">
+            Projetos são espaços de trabalho independentes com <strong>memória própria</strong>, histórico de conversas, base de conhecimento e instruções personalizadas. Pense neles como ambientes dedicados para fluxos de trabalho específicos — como ter uma sala de reunião virtual para cada área do seu trabalho.
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <button class="accordion-btn" onclick="toggleAccordion(this)">
+          <span class="icon">📚</span>
+          Base de conhecimento persistente
+          <span class="chevron">▼</span>
+        </button>
+        <div class="accordion-body">
+          <div class="accordion-body-inner">
+            Envie documentos relevantes uma única vez — o Claude os consulta em <strong>todas as conversas</strong> dentro do projeto. Sem precisar reenviar os mesmos arquivos toda vez. Suporta PDF, DOCX, CSV, TXT, HTML e muito mais.
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <button class="accordion-btn" onclick="toggleAccordion(this)">
+          <span class="icon">⚙️</span>
+          Instruções de projeto
+          <span class="chevron">▼</span>
+        </button>
+        <div class="accordion-body">
+          <div class="accordion-body-inner">
+            Defina como o Claude deve se comportar: tom, nível de especialização, estilo de resposta, processos obrigatórios e requisitos específicos. Essas instruções se aplicam automaticamente a <strong>todas as conversas</strong> do projeto.
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <button class="accordion-btn" onclick="toggleAccordion(this)">
+          <span class="icon">🚀</span>
+          Escalabilidade automática (RAG)
+          <span class="chevron">▼</span>
+        </button>
+        <div class="accordion-body">
+          <div class="accordion-body-inner">
+            Quando a base de conhecimento se aproxima dos limites de contexto, o Claude ativa de forma transparente o modo de <strong>Geração Aumentada por Recuperação (RAG)</strong>. Isso expande a capacidade em até 10x, recuperando de forma inteligente apenas as informações mais relevantes para cada pergunta.
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <button class="accordion-btn" onclick="toggleAccordion(this)">
+          <span class="icon">👥</span>
+          Colaboração em equipe
+          <span class="chevron">▼</span>
+        </button>
+        <div class="accordion-body">
+          <div class="accordion-body-inner">
+            Para usuários do Claude for Work, os projetos permitem colaboração com três níveis de permissão: <strong>Pode visualizar</strong> (acesso somente leitura), <strong>Pode editar</strong> (colaboração total) e <strong>Proprietário</strong> (controle completo). Compartilhe com indivíduos ou toda a organização.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ SIMULADOR DE CRIAÇÃO ═══════ -->
+<section style="background: var(--bg-dark);">
+  <div class="container">
+    <div class="fade-in">
+      <span class="section-label section-label--teal">Mão na massa</span>
+      <h2 class="section-title">Simulador: Crie seu projeto</h2>
+      <p class="section-desc">Siga os três passos para entender na prática como criar um projeto no Claude.</p>
+    </div>
+
+    <div class="card fade-in">
+      <div class="steps-wrap">
+        <div class="step-tabs">
+          <button class="step-tab active" onclick="showStep(0, this)">1. Configurar</button>
+          <button class="step-tab" onclick="showStep(1, this)">2. Instruções</button>
+          <button class="step-tab" onclick="showStep(2, this)">3. Conhecimento</button>
+        </div>
+
+        <div class="step-panel active" id="step0">
+          <h3>Configure seu projeto</h3>
+          <p>Dê ao seu projeto um nome descritivo e defina a visibilidade.</p>
+          <div class="mock-ui">
+            <label class="mock-label">Nome do projeto</label>
+            <input class="mock-input" type="text" placeholder='Ex: "Campanha de Marketing Q4"' id="projName">
+            <label class="mock-label" style="margin-top:12px">Descrição</label>
+            <input class="mock-input" type="text" placeholder="Breve descrição do objetivo" id="projDesc">
+            <div style="display:flex;gap:8px;margin-top:12px;">
+              <button class="mock-btn mock-btn--ghost" onclick="setVisibility(this,'Privado')">🔒 Privado</button>
+              <button class="mock-btn mock-btn--ghost" onclick="setVisibility(this,'Organização')">🌐 Organização</button>
+            </div>
+            <div id="projFeedback" style="margin-top:12px;font-size:.85rem;color:var(--teal);display:none;"></div>
+          </div>
+        </div>
+
+        <div class="step-panel" id="step1">
+          <h3>Adicione instruções</h3>
+          <p>Diga ao Claude como se comportar. Boas instruções incluem contexto, processo, tom e requisitos.</p>
+          <div class="mock-ui">
+            <label class="mock-label">Instruções do projeto</label>
+            <textarea class="mock-textarea" placeholder='Ex: "Este projeto é para criar conteúdo de marketing B2B. Use tom profissional mas conversacional. Sempre inclua uma chamada para ação."' id="projInstructions"></textarea>
+            <div style="margin-top:12px;">
+              <button class="mock-btn mock-btn--primary" onclick="saveInstructions()">Salvar instruções</button>
+            </div>
+            <div id="instrFeedback" style="margin-top:12px;font-size:.85rem;color:var(--teal);display:none;"></div>
+          </div>
+        </div>
+
+        <div class="step-panel" id="step2">
+          <h3>Construa a base de conhecimento</h3>
+          <p>Envie os documentos que o Claude deve consultar. Nomeie os arquivos de forma descritiva!</p>
+          <div class="mock-ui">
+            <label class="mock-label">Arquivos do projeto</label>
+            <div id="fileList" style="margin-bottom:12px;"></div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button class="mock-btn mock-btn--ghost" onclick="addFile('Diretrizes-Marca-Q4.pdf')">+ Diretrizes da Marca</button>
+              <button class="mock-btn mock-btn--ghost" onclick="addFile('Pesquisa-Clientes-2024.csv')">+ Pesquisa de Clientes</button>
+              <button class="mock-btn mock-btn--ghost" onclick="addFile('Template-Blog-Post.docx')">+ Template de Blog</button>
+              <button class="mock-btn mock-btn--ghost" onclick="addFile('Relatório-Concorrentes.pdf')">+ Relatório Concorrentes</button>
+            </div>
+            <div id="fileFeedback" style="margin-top:12px;font-size:.85rem;color:var(--teal);display:none;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ JOGO DE ASSOCIAÇÃO ═══════ -->
+<section>
+  <div class="container">
+    <div class="fade-in">
+      <span class="section-label section-label--gold">Desafio</span>
+      <h2 class="section-title">Associe: Projetos vs Skills</h2>
+      <p class="section-desc">Clique em um item da esquerda, depois clique na categoria correta à direita. Projetos armazenam <strong>conhecimento</strong>, Skills executam <strong>tarefas</strong>.</p>
+    </div>
+
+    <div class="card fade-in">
+      <div class="match-game" id="matchGame">
+        <div>
+          <div class="match-col-title">Cenários</div>
+          <div class="match-item" data-answer="projeto" onclick="selectMatch(this)">Guardar atas de reunião para o Claude consultar</div>
+          <div class="match-item" data-answer="skill" onclick="selectMatch(this)">Aplicar diretrizes de marca em apresentações automaticamente</div>
+          <div class="match-item" data-answer="projeto" onclick="selectMatch(this)">Centralizar especificações de produto e análise competitiva</div>
+          <div class="match-item" data-answer="skill" onclick="selectMatch(this)">Seguir um processo repetível de criação de PDFs</div>
+          <div class="match-item" data-answer="projeto" onclick="selectMatch(this)">Compartilhar contexto com colegas de equipe</div>
+          <div class="match-item" data-answer="skill" onclick="selectMatch(this)">Gerar relatórios financeiros com etapas padronizadas</div>
+        </div>
+        <div>
+          <div class="match-col-title">Categorias</div>
+          <div class="match-item" data-category="projeto" onclick="selectCategory(this)" style="background:rgba(26,122,109,.04);border-color:var(--teal);">
+            🗂️ <strong>Projeto</strong> — armazena conhecimento
+          </div>
+          <div class="match-item" data-category="skill" onclick="selectCategory(this)" style="background:rgba(201,150,43,.04);border-color:var(--gold);">
+            ⚡ <strong>Skill</strong> — executa tarefas
+          </div>
+        </div>
+        <div class="match-feedback" id="matchFeedback"></div>
+      </div>
+      <div style="text-align:center;margin-top:16px;">
+        <span id="matchScore" style="font-size:.9rem;color:var(--ink-light);"></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ DICAS ═══════ -->
+<section style="background: var(--bg-dark);">
+  <div class="container">
+    <div class="fade-in">
+      <span class="section-label section-label--accent">Boas práticas</span>
+      <h2 class="section-title">Dicas para usar Projetos</h2>
+      <p class="section-desc">Navegue pelas dicas para aproveitar ao máximo os seus projetos.</p>
+    </div>
+
+    <div class="tips-carousel fade-in" id="tipsCarousel">
+      <div class="tips-track" id="tipsTrack">
+        <div class="tip-card">
+          <div class="tip-number">01</div>
+          <h3>Comece focado, depois expanda</h3>
+          <p>Inicie com um caso de uso específico em vez de tentar criar um projeto para tudo. Você pode adicionar mais conteúdo ao longo do tempo conforme o projeto evolui.</p>
+        </div>
+        <div class="tip-card">
+          <div class="tip-number">02</div>
+          <h3>Mantenha a base de conhecimento atualizada</h3>
+          <p>Documentos desatualizados levam a respostas desatualizadas. Revise e atualize o conhecimento periodicamente para manter a qualidade.</p>
+        </div>
+        <div class="tip-card">
+          <div class="tip-number">03</div>
+          <h3>Escreva instruções claras e específicas</h3>
+          <p>Instruções vagas levam a resultados inconsistentes. Inclua contexto, tom, processo e requisitos explícitos nas instruções do projeto.</p>
+        </div>
+        <div class="tip-card">
+          <div class="tip-number">04</div>
+          <h3>Nomeie arquivos de forma descritiva</h3>
+          <p>O Claude usa os nomes dos arquivos para recuperar a informação correta. "Diretrizes-Marca-Q4-2024.pdf" é muito mais útil do que "documento1.pdf".</p>
+        </div>
+        <div class="tip-card">
+          <div class="tip-number">05</div>
+          <h3>Faça referência aos documentos pelo nome</h3>
+          <p>Ao fazer perguntas, mencione documentos específicos: "Com base no nosso relatório do Q3, quais foram as principais preocupações dos clientes?"</p>
+        </div>
+      </div>
+      <div class="tips-nav">
+        <button class="tips-arrow" onclick="moveTip(-1)">←</button>
+        <div id="tipsDots"></div>
+        <button class="tips-arrow" onclick="moveTip(1)">→</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ QUIZ ═══════ -->
+<section>
+  <div class="container">
+    <div class="fade-in">
+      <span class="section-label section-label--teal">Teste seus conhecimentos</span>
+      <h2 class="section-title">Quiz da Lição 5</h2>
+      <p class="section-desc">Responda as perguntas para verificar se você absorveu os conceitos desta lição.</p>
+    </div>
+
+    <div class="card fade-in" id="quizCard">
+      <div class="quiz-question" data-correct="2">
+        <div class="quiz-q"><span class="q-num">1</span> O que acontece quando a base de conhecimento de um projeto se aproxima dos limites de contexto?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="selectQuiz(this)">O Claude para de aceitar novos arquivos</div>
+          <div class="quiz-opt" onclick="selectQuiz(this)">Você precisa criar um novo projeto</div>
+          <div class="quiz-opt" onclick="selectQuiz(this)">O Claude ativa automaticamente o modo RAG, expandindo a capacidade em até 10x</div>
+          <div class="quiz-opt" onclick="selectQuiz(this)">Os arquivos mais antigos são excluídos</div>
+        </div>
+        <div class="quiz-explain">O RAG (Retrieval-Augmented Generation) permite que o Claude pesquise e recupere de forma inteligente apenas as informações mais relevantes para cada pergunta, sem carregar tudo na memória.</div>
+      </div>
+
+      <div class="quiz-question" data-correct="1">
+        <div class="quiz-q"><span class="q-num">2</span> Qual é a principal vantagem de adicionar documentos à base de conhecimento de um projeto?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="selectQuiz(this)">Os documentos ficam armazenados na nuvem</div>
+          <div class="quiz-opt" onclick="selectQuiz(this)">O Claude consulta esses documentos em todas as conversas do projeto, sem precisar reenviá-los</div>
+          <div class="quiz-opt" onclick="selectQuiz(this)">Os documentos são compartilhados publicamente</div>
+          <div class="quiz-opt" onclick="selectQuiz(this)">Os documentos são convertidos automaticamente para texto</div>
+        </div>
+        <div class="quiz-explain">A base de conhecimento é persistente — o Claude a consulta em todas as conversas dentro do projeto, eliminando a necessidade de reenviar os mesmos arquivos.</div>
+      </div>
+
+      <div class="quiz-question" data-correct="2">
+        <div class="quiz-q"><span class="q-num">3</span> Qual nível de permissão permite que um membro da equipe modifique instruções do projeto?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="selectQuiz(this)">Pode visualizar</div>
+          <div class="quiz-opt" onclick="selectQuiz(this)">Convidado</div>
+          <div class="quiz-opt" onclick="selectQuiz(this)">Pode editar</div>
+          <div class="quiz-opt" onclick="selectQuiz(this)">Observador</div>
+        </div>
+        <div class="quiz-explain">"Pode editar" dá poder total de colaboração: modificar instruções, atualizar conhecimento, gerenciar membros e contribuir ativamente.</div>
+      </div>
+
+      <div class="quiz-question" data-correct="0">
+        <div class="quiz-q"><span class="q-num">4</span> Quando é especialmente recomendado criar um projeto?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="selectQuiz(this)">Quando o trabalho envolve materiais de referência usados repetidamente e requisitos consistentes</div>
+          <div class="quiz-opt" onclick="selectQuiz(this)">Quando você tem uma pergunta pontual e rápida</div>
+          <div class="quiz-opt" onclick="selectQuiz(this)">Quando quer apenas conversar casualmente com o Claude</div>
+          <div class="quiz-opt" onclick="selectQuiz(this)">Quando precisa fazer apenas um cálculo simples</div>
+        </div>
+        <div class="quiz-explain">Projetos são especialmente valiosos para trabalhos contínuos que envolvem materiais de referência recorrentes, requisitos consistentes de resposta e necessidades de colaboração.</div>
+      </div>
+
+      <div class="quiz-question" data-correct="1">
+        <div class="quiz-q"><span class="q-num">5</span> Qual a principal diferença entre Projetos e Skills?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="selectQuiz(this)">Projetos são para equipes; Skills são para indivíduos</div>
+          <div class="quiz-opt" onclick="selectQuiz(this)">Projetos armazenam conhecimento; Skills executam tarefas</div>
+          <div class="quiz-opt" onclick="selectQuiz(this)">Projetos são gratuitos; Skills exigem plano pago</div>
+          <div class="quiz-opt" onclick="selectQuiz(this)">Projetos funcionam offline; Skills exigem internet</div>
+        </div>
+        <div class="quiz-explain">Projetos fornecem o "quê" (informação e contexto), enquanto Skills fornecem o "como" (processo e metodologia). Eles se complementam.</div>
+      </div>
+    </div>
+
+    <button class="quiz-submit" onclick="submitQuiz()">Verificar respostas</button>
+
+    <div class="quiz-results" id="quizResults">
+      <div class="score" id="quizScore"></div>
+      <p id="quizMsg"></p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ FOOTER ═══════ -->
+<div class="footer">
+  <p>Treinamento Claude — Lição 5: Projetos &nbsp;|&nbsp; <a href="https://claude.ai" target="_blank">claude.ai</a></p>
+</div>
+
+<script>
+// ─── PROGRESS BAR ───
+window.addEventListener('scroll', () => {
+  const h = document.documentElement.scrollHeight - window.innerHeight;
+  document.getElementById('progressBar').style.width = (window.scrollY / h * 100) + '%';
+});
+
+// ─── FADE IN ON SCROLL ───
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.15 });
+document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
+
+// ─── ACCORDION ───
+function toggleAccordion(btn) {
+  const wasActive = btn.classList.contains('active');
+  document.querySelectorAll('.accordion-btn').forEach(b => { b.classList.remove('active'); b.nextElementSibling.classList.remove('open'); });
+  if (!wasActive) { btn.classList.add('active'); btn.nextElementSibling.classList.add('open'); }
+}
+
+// ─── STEP TABS ───
+function showStep(i, tab) {
+  document.querySelectorAll('.step-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+  tab.classList.add('active');
+  document.getElementById('step' + i).classList.add('active');
+}
+
+// ─── PROJECT SIMULATOR ───
+function setVisibility(btn, type) {
+  btn.parentElement.querySelectorAll('.mock-btn').forEach(b => { b.style.background = ''; b.style.color = ''; });
+  btn.style.background = 'var(--teal)';
+  btn.style.color = '#fff';
+  const fb = document.getElementById('projFeedback');
+  fb.style.display = 'block';
+  fb.textContent = '✓ Visibilidade definida como: ' + type;
+}
+
+function saveInstructions() {
+  const v = document.getElementById('projInstructions').value.trim();
+  const fb = document.getElementById('instrFeedback');
+  fb.style.display = 'block';
+  fb.textContent = v.length > 10 ? '✓ Instruções salvas! Elas serão aplicadas a todas as conversas deste projeto.' : '⚠ Adicione instruções mais detalhadas para melhores resultados.';
+}
+
+const addedFiles = new Set();
+function addFile(name) {
+  if (addedFiles.has(name)) return;
+  addedFiles.add(name);
+  const list = document.getElementById('fileList');
+  const tag = document.createElement('span');
+  tag.className = 'mock-tag';
+  tag.textContent = '📄 ' + name;
+  list.appendChild(tag);
+  const fb = document.getElementById('fileFeedback');
+  fb.style.display = 'block';
+  fb.textContent = '✓ ' + addedFiles.size + ' arquivo(s) na base de conhecimento';
+}
+
+// ─── MATCHING GAME ───
+let selectedMatch = null;
+let matchCorrect = 0;
+let matchTotal = 0;
+const totalMatches = 6;
+
+function selectMatch(el) {
+  if (el.classList.contains('correct')) return;
+  document.querySelectorAll('.match-item[data-answer]').forEach(m => m.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedMatch = el;
+}
+
+function selectCategory(el) {
+  if (!selectedMatch) return;
+  const answer = selectedMatch.dataset.answer;
+  const category = el.dataset.category;
+  matchTotal++;
+  if (answer === category) {
+    matchCorrect++;
+    selectedMatch.classList.remove('selected');
+    selectedMatch.classList.add('correct');
+    selectedMatch.style.pointerEvents = 'none';
+  } else {
+    selectedMatch.classList.remove('selected');
+    selectedMatch.classList.add('wrong');
+    setTimeout(() => selectedMatch.classList.remove('wrong'), 600);
+  }
+  selectedMatch = null;
+  document.getElementById('matchScore').textContent = matchCorrect + ' de ' + totalMatches + ' corretos';
+
+  if (matchCorrect === totalMatches) {
+    const fb = document.getElementById('matchFeedback');
+    fb.className = 'match-feedback show success';
+    fb.textContent = '🎉 Parabéns! Você associou todos os cenários corretamente!';
+  }
+}
+
+// ─── TIPS CAROUSEL ───
+let tipIndex = 0;
+const tipCount = 5;
+
+function initDots() {
+  const wrap = document.getElementById('tipsDots');
+  for (let i = 0; i < tipCount; i++) {
+    const dot = document.createElement('button');
+    dot.className = 'tips-dot' + (i === 0 ? ' active' : '');
+    dot.onclick = () => goTip(i);
+    wrap.appendChild(dot);
+  }
+}
+initDots();
+
+function goTip(i) {
+  tipIndex = i;
+  document.getElementById('tipsTrack').style.transform = 'translateX(-' + (i * 100) + '%)';
+  document.querySelectorAll('.tips-dot').forEach((d, idx) => d.classList.toggle('active', idx === i));
+}
+
+function moveTip(dir) {
+  goTip((tipIndex + dir + tipCount) % tipCount);
+}
+
+// ─── QUIZ ───
+function selectQuiz(opt) {
+  const q = opt.closest('.quiz-question');
+  if (q.dataset.answered) return;
+  q.querySelectorAll('.quiz-opt').forEach(o => o.classList.remove('selected'));
+  opt.classList.add('selected');
+}
+
+function submitQuiz() {
+  const questions = document.querySelectorAll('.quiz-question');
+  let correct = 0;
+
+  questions.forEach(q => {
+    const correctIdx = parseInt(q.dataset.correct);
+    const opts = q.querySelectorAll('.quiz-opt');
+    const selected = q.querySelector('.quiz-opt.selected');
+    const explain = q.querySelector('.quiz-explain');
+
+    if (!selected) return;
+
+    q.dataset.answered = 'true';
+    const selectedIdx = Array.from(opts).indexOf(selected);
+
+    opts.forEach(o => { o.classList.add('disabled'); o.classList.remove('selected'); });
+
+    opts[correctIdx].classList.remove('disabled');
+    opts[correctIdx].classList.add('correct');
+
+    if (selectedIdx === correctIdx) {
+      correct++;
+      explain.className = 'quiz-explain show right';
+    } else {
+      selected.classList.remove('disabled');
+      selected.classList.add('wrong');
+      explain.className = 'quiz-explain show wrong-exp';
+    }
+  });
+
+  const total = questions.length;
+  const res = document.getElementById('quizResults');
+  res.classList.add('show');
+  document.getElementById('quizScore').textContent = correct + '/' + total;
+
+  const pct = correct / total;
+  document.getElementById('quizMsg').textContent =
+    pct === 1 ? 'Perfeito! Você dominou os conceitos de Projetos!' :
+    pct >= 0.6 ? 'Bom trabalho! Revise os pontos que errou para fixar.' :
+    'Continue estudando! Releia os conceitos e tente novamente.';
+}
+</script>
+
+</body>
+</html>
